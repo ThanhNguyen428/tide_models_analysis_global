@@ -1,0 +1,14 @@
+1. Input: SWOT files, SWOT orbit
+2. For every SWOT orbit: from (-25, 25), identify coastline
+    * coastline = distance_to_coast = [0, 5000] AND depth_and_elevation <= 0
+    * NaN all other values
+3. For every coastline: subset into 20km segments
+4. For every segment: check every not-NaN point
+5. For every point shallower than -50m:
+    * center 10x10 patch on point (swot file)
+    * throw out patches/pixels >50m deep
+    * keep patch with >=1/3 ocean AND has one pixel (-50, 0).
+    * calculate R^2 of ocean_tide_fes vs. SSH + height_cor_xover
+    and R^2 of ocean_tide_got vs. SSH + height_cor_xover
+
+6. How do I save the R^2? .nc lat/lon? variable "patch"?
