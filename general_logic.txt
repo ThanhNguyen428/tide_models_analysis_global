@@ -11,4 +11,6 @@
     * calculate R^2 of ocean_tide_fes vs. SSH + height_cor_xover
     and R^2 of ocean_tide_got vs. SSH + height_cor_xover
 
-6. How do I save the R^2? .nc lat/lon? variable "patch"?
+6. How do I save the R^2? .nc lat/lon? variable "patch"? (NO)
+    * how do i access the files? answer: preload all files in before loop
+    * save R^2 via dictionary/json of lat-lon of center: [r2_fes, r^2_got]
