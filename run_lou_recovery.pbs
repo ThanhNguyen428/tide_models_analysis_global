@@ -1,0 +1,21 @@
+#!/bin/bash
+#PBS -N tide_r2_fix
+#PBS -q e_normal
+#PBS -l select=1:ncpus=4:mem=32gb:model=cas_end
+#PBS -l walltime=02:00:00
+#PBS -J 1-4
+#PBS -o logs/
+#PBS -e logs/
+
+# Map array index to the original failed worker IDs
+FAILED_WORKERS=(3 5 7 32)
+ORIGINAL_WID=${FAILED_WORKERS[$((PBS_ARRAY_INDEX - 1))]}
+TOTAL_WORKERS=32
+
+cd "$PBS_O_WORKDIR"
+source /usr/share/modules/init/bash
+module load python3/3.11.5
+
+python3 run_worker.py \
+    --worker-id "$ORIGINAL_WID" \
+    --total-workers "$TOTAL_WORKERS"
