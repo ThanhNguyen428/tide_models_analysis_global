@@ -12,6 +12,8 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.append('../tide_models_analysis_global')  # for setup.py and read_pass.py
+
 from setup import FILE_INDEX, load_passes
 from read_pass import process_pass
 
@@ -38,7 +40,7 @@ def main():
         print("Nothing to do — exiting.")
         return
 
-    RESULTS_DIR = Path("tide_analysis_results")
+    RESULTS_DIR = Path("../tide_analysis_results")
     RESULTS_DIR.mkdir(exist_ok=True)
 
     # load only this worker's passes
