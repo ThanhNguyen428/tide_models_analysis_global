@@ -1,16 +1,16 @@
 #!/bin/bash
-# Copy project to Lou and submit the PBS array job.
-#
-# From a local machine:
-#   bash submit_lou.sh
+# Submit the PBS array job on Lou/Endeavour.
 #
 # Already on lfe/pfe (NAS shared filesystem):
-#   bash submit_lou.sh --local
+#   bash NAS_scripts/submit_lou.sh --local
+#
+# From a local machine:
+#   bash NAS_scripts/submit_lou.sh
 
 set -e
 
 PROJECT_DIR="/home4/tvnguy18/tide_models_analysis_global"
-LOU_HOST="lfe"   # Lou frontend
+LOU_HOST="lfe"
 
 if [[ "$1" == "--local" ]]; then
     echo "Skipping copy (shared filesystem)"
@@ -22,19 +22,19 @@ else
     echo "Copy done."
 fi
 
-# Create output directories (works locally or via ssh)
+# Create output directories and submit
 if [[ "$1" == "--local" ]]; then
     mkdir -p "${PROJECT_DIR}/tide_analysis_results"
     mkdir -p "${PROJECT_DIR}/logs"
     cd "${PROJECT_DIR}"
     echo "Submitting PBS array job ..."
-    qsub run_lou.pbs
+    qsub NAS_scripts/run_lou.pbs
 else
     ssh "${LOU_HOST}" bash -lc "'
         mkdir -p ${PROJECT_DIR}/tide_analysis_results
         mkdir -p ${PROJECT_DIR}/logs
         cd ${PROJECT_DIR}
-        qsub run_lou.pbs
+        qsub NAS_scripts/run_lou.pbs
     '"
 fi
 

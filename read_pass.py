@@ -1,10 +1,9 @@
 """
-Steps 2–5 from general_logic.txt, plus R² computation from finished CSVs.
+Steps 2–4 from general_logic.txt, plus R² and correlated variance from CSVs.
 
     2. Identify coastline per pass
-    3. Segment coastline into 20 km chunks
-    4. Check every non-NaN coastal point in each segment
-    5. For qualifying points: write per-cycle CSV, then compute R² from it
+    3. Check every coastal point with valid quality
+    4. For qualifying points: write per-cycle CSV, then compute R² and variance
 """
 
 import numpy as np
@@ -17,8 +16,6 @@ from setup import (
     DEPTH_SHALLOW_LIMIT,
     PATCH_SIZE,
     OCEAN_FRAC_MIN,
-    SEGMENT_KM,
-    ALONG_TRACK_KM,
 )
 from swot_tide_analysis import analyze_point
 
@@ -40,13 +37,29 @@ def compute_r2(y, x):
     return 1 - rss / tss
 
 
-def compute_r2_from_csv(csv_path):
-    """Read a per-point CSV written by swot_tide_analysis and return (r2_fes, r2_got)."""
+# ── correlated variance ───────────────────────────────────────────────────
+
+def compute_correlated_variance(a, b):
+    """Var(A + B) = Var(A) + Var(B) + 2*Cov(A, B). Returns NaN if < 3 valid."""
+    valid = ~(np.isnan(a) | np.isnan(b))
+    if valid.sum() < 3:
+        return np.nan
+    a, b = a[valid], b[valid]
+    return np.var(a, ddof=1) + np.var(b, ddof=1) + 2 * np.cov(a, b, ddof=1)[0, 1]
+
+
+def compute_metrics_from_csv(csv_path):
+    """Read a per-point CSV and return (r2_fes, r2_got, fes_var, got_var)."""
     df = pd.read_csv(csv_path)
     ssh = df["ssh_karin_2_plus_xover_mean_m"].values
     fes = df["ocean_tide_fes_mean_m"].values
     got = df["ocean_tide_got_mean_m"].values
-    return compute_r2(fes, ssh), compute_r2(got, ssh)
+    return (
+        compute_r2(fes, ssh),
+        compute_r2(got, ssh),
+        compute_correlated_variance(fes, ssh),
+        compute_correlated_variance(got, ssh),
+    )
 
 
 # ── step 2 ──────────────────────────────────────────────────────────────────
@@ -62,83 +75,63 @@ def identify_coastline(pass_data):
     )
 
 
-# ── step 3 ──────────────────────────────────────────────────────────────────
-
-def segment_coastline(coast_mask):
-    """Divide rows with coastal pixels into ~20 km along-track segments."""
-    rows_with_coast = np.where(coast_mask.any(axis=1))[0]
-    if len(rows_with_coast) == 0:
-        return []
-    rows_per_seg = max(1, round(SEGMENT_KM / ALONG_TRACK_KM))
-    segments = []
-    for i in range(0, len(rows_with_coast), rows_per_seg):
-        segments.append(rows_with_coast[i : i + rows_per_seg])
-    return segments
-
-
-# ── steps 4 & 5 ────────────────────────────────────────────────────────────
+# ── steps 3 & 4 ────────────────────────────────────────────────────────────
 
 def process_pass(pass_number, pass_data, output_dir):
     """Full pipeline for one pass.
 
     For each qualifying coastal point:
       1. swot_tide_analysis writes the per-cycle CSV  (no R²)
-      2. this function reads it back and computes R²
+      2. this function reads it back and computes R² and correlated variance
 
-    Returns list of dicts: {lat, lon, r2_fes, r2_got}
+    Returns list of dicts: {lat, lon, r2_fes, r2_got, fes_var, got_var}
     """
     depth = pass_data["depth_or_elevation"]
     n_lines, n_pixels = depth.shape
     half = PATCH_SIZE // 2
 
     coast_mask = identify_coastline(pass_data)
-    segments = segment_coastline(coast_mask)
-    if not segments:
-        return []
 
     results = []
 
-    for seg_rows in segments:
-        for i in seg_rows:
-            for j in range(n_pixels):
-                if not coast_mask[i, j]:
-                    continue
-                if depth[i, j] < DEPTH_SHALLOW_LIMIT:
-                    continue
-                if (i < half or i + half > n_lines
-                        or j < half or j + half > n_pixels):
-                    continue
+    for i in range(n_lines):
+        for j in range(n_pixels):
+            if not coast_mask[i, j]:
+                continue
+            if depth[i, j] < DEPTH_SHALLOW_LIMIT:
+                continue
+            if (i < half or i + half > n_lines
+                    or j < half or j + half > n_pixels):
+                continue
 
-                patch_depth = depth[i - half:i + half, j - half:j + half]
+            patch_depth = depth[i - half:i + half, j - half:j + half]
 
-                # ocean = valid (not NaN) and at or below sea level
-                ocean_mask = (patch_depth <= 0) & ~np.isnan(patch_depth)
+            ocean_mask = (patch_depth <= 0) & ~np.isnan(patch_depth)
 
-                # keep patch only if >= 1/3 of pixels are ocean
-                if ocean_mask.sum() < OCEAN_FRAC_MIN * PATCH_SIZE * PATCH_SIZE:
-                    continue
+            if ocean_mask.sum() < OCEAN_FRAC_MIN * PATCH_SIZE * PATCH_SIZE:
+                continue
 
-                # step 5a: write per-cycle CSV
-                csv_path = analyze_point(
-                    pass_data, i, j, ocean_mask, pass_number, output_dir,
-                )
-                if csv_path is None:
-                    continue
+            csv_path = analyze_point(
+                pass_data, i, j, ocean_mask, pass_number, output_dir,
+            )
+            if csv_path is None:
+                continue
 
-                # step 5b: compute R² from the finished CSV
-                r2_fes, r2_got = compute_r2_from_csv(csv_path)
+            r2_fes, r2_got, fes_var, got_var = compute_metrics_from_csv(csv_path)
 
-                center_lat = float(pass_data["latitude"][i, j])
-                center_lon = float(pass_data["longitude"][i, j])
-                if center_lon > 180:
-                    center_lon -= 360
+            center_lat = float(pass_data["latitude"][i, j])
+            center_lon = float(pass_data["longitude"][i, j])
+            if center_lon > 180:
+                center_lon -= 360
 
-                results.append({
-                    "lat": center_lat,
-                    "lon": center_lon,
-                    "r2_fes": float(r2_fes),
-                    "r2_got": float(r2_got),
-                })
+            results.append({
+                "lat": center_lat,
+                "lon": center_lon,
+                "r2_fes": float(r2_fes),
+                "r2_got": float(r2_got),
+                "fes_var": float(fes_var),
+                "got_var": float(got_var),
+            })
 
     return results
 

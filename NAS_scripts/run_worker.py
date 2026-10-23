@@ -12,7 +12,8 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.append('../tide_models_analysis_global')  # for setup.py and read_pass.py
+# parent directory contains setup.py and read_pass.py
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from setup import FILE_INDEX, load_passes
 from read_pass import process_pass
@@ -29,7 +30,6 @@ def main():
     wid = args.worker_id
     n_workers = args.total_workers
 
-    # distribute passes round-robin so each worker gets a similar load
     all_passes = sorted(FILE_INDEX.keys())
     my_passes = [p for i, p in enumerate(all_passes)
                  if i % n_workers == (wid - 1)]
@@ -40,10 +40,10 @@ def main():
         print("Nothing to do — exiting.")
         return
 
-    RESULTS_DIR = Path("../tide_analysis_results")
+    PROJECT_DIR = Path(__file__).resolve().parent.parent
+    RESULTS_DIR = PROJECT_DIR / "tide_analysis_results"
     RESULTS_DIR.mkdir(exist_ok=True)
 
-    # load only this worker's passes
     data = load_passes(my_passes)
 
     r2_dict = {}
@@ -59,13 +59,12 @@ def main():
 
         for r in results:
             key = f"{r['lat']:.4f},{r['lon']:.4f}"
-            r2_dict[key] = [r["r2_fes"], r["r2_got"]]
+            r2_dict[key] = [r["r2_fes"], r["r2_got"], r["fes_var"], r["got_var"]]
 
         elapsed = time.time() - t0
         print(f"{len(results)} points – {elapsed / 60:.1f} min elapsed",
               flush=True)
 
-    # write partial results
     partial_path = RESULTS_DIR / f"r2_partial_{wid:03d}.json"
     with open(partial_path, "w") as f:
         json.dump(r2_dict, f, indent=2)

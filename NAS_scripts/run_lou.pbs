@@ -4,16 +4,17 @@
 #PBS -l select=1:ncpus=4:mem=16gb:model=cas_end
 #PBS -l walltime=02:00:00
 #PBS -J 1-32
-#PBS -o logs/
-#PBS -e logs/
+#PBS -o /home4/tvnguy18/tide_models_analysis_global/logs/
+#PBS -e /home4/tvnguy18/tide_models_analysis_global/logs/
 #PBS -m ae
 
 TOTAL_WORKERS=32
+PROJECT_DIR="/home4/tvnguy18/tide_models_analysis_global"
 
-cd "$PBS_O_WORKDIR"
+cd "$PROJECT_DIR"
 source /usr/share/modules/init/bash
 module load python3/3.11.5
 
-python3 run_worker.py \
+python3 NAS_scripts/run_worker.py \
     --worker-id "$PBS_ARRAY_INDEX" \
     --total-workers "$TOTAL_WORKERS"
