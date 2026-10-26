@@ -12,7 +12,7 @@ LAT_BOUNDS = (-25, 25)
 COAST_DIST_MAX = 5000          # metres – distance_to_coast <= this
 DEPTH_COASTAL_MAX = 0          # depth_or_elevation <= 0 for coastline mask
 DEPTH_SHALLOW_LIMIT = -50      # only process points shallower than -50 m
-PATCH_SIZE = 10                # 10×10 pixel patch
+PATCH_SIZE = 5                # 5x5 pixel patch
 OCEAN_FRAC_MIN = 1 / 4         # patch must be >= 1/4 ocean
 
 # variables that are the same across every cycle of a pass (grid properties)
