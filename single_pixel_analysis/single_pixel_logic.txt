@@ -1,0 +1,17 @@
+1. Input: SWOT files, SWOT orbit
+2. For every SWOT orbit: from (-25, 25), identify coastline
+    * coastline = distance_to_coast = (0, 5000] AND depth_and_elevation <= 0.
+    * NaN all other values
+3. For every coastline: check every ssh_karin_2 point with ssh_karin_2_qual != 0 and height_cor_xover_qual != 0
+    * a point is a point within the bounds of the coastline
+4. For every point shallower than -50m (aka depth_or_elevation >= -50m):
+    * calculate R^2 of ocean_tide_fes vs. SSH + height_cor_xover
+    and R^2 of ocean_tide_got vs. SSH + height_cor_xover using .csv
+    * calculate variance of fes and SSH + height_cor_xover, 
+      variance of got and SSH + height_cor_xover using correlated variance formula
+
+5. How do I save the R^2 and variance?
+    * how do i access the files? answer: preload all files in before loop
+    * save R^2 and variance via dictionary/json of lat-lon of center: [r^2_fes, r^2_got, fes_var, got_var]
+
+
