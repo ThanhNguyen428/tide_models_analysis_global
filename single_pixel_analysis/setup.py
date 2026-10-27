@@ -9,7 +9,7 @@ SWOT_MIRROR = Path("/nobackupp29/nmccurdy/swot_mirror/SWOT_L2_LR_SSH_D")
 
 # ── thresholds / constants (from single_pixel_logic.txt) ──
 LAT_BOUNDS = (-25, 25)
-COAST_DIST_MAX = 5000          # metres – distance_to_coast <= this
+COAST_DIST_MAX = 10000          # metres – distance_to_coast <= this
 DEPTH_COASTAL_MAX = 0          # depth_or_elevation <= 0 for coastline mask
 DEPTH_SHALLOW_LIMIT = -50      # only process points shallower than -50 m
 
