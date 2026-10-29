@@ -47,8 +47,15 @@ def compute_correlated_variance(a, b):
 
 
 def compute_metrics_from_csv(csv_path):
-    """Read a per-point CSV and return (r2_fes, r2_got, fes_var, got_var)."""
+    """Read a per-point CSV and return (r2_fes, r2_got, fes_var, got_var).
+
+    Returns None if any cycle has dynamic_ice_flag != 0.
+    """
     df = pd.read_csv(csv_path)
+
+    if (df["dynamic_ice_flag"] != 0).any():
+        return None
+
     ssh = df["ssh_karin_2_plus_xover_m"].values
     fes = df["ocean_tide_fes_m"].values
     got = df["ocean_tide_got_m"].values
@@ -104,7 +111,10 @@ def process_pass(pass_number, pass_data, output_dir):
             if csv_path is None:
                 continue
 
-            r2_fes, r2_got, fes_var, got_var = compute_metrics_from_csv(csv_path)
+            metrics = compute_metrics_from_csv(csv_path)
+            if metrics is None:
+                continue
+            r2_fes, r2_got, fes_var, got_var = metrics
 
             center_lat = float(pass_data["latitude"][i, j])
             center_lon = float(pass_data["longitude"][i, j])

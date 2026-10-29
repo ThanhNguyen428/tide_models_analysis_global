@@ -5,6 +5,7 @@
 3. For every coastline: check every ssh_karin_2 point with ssh_karin_2_qual != 0 and height_cor_xover_qual != 0
     * a point is a point within the bounds of the coastline
 4. For every point shallower than -50m (aka depth_or_elevation >= -50m):
+    * if every cycle for this point has dynamic_ice_flag == 0 (use .csv), then:
     * calculate R^2 of ocean_tide_fes vs. SSH + height_cor_xover
     and R^2 of ocean_tide_got vs. SSH + height_cor_xover using .csv
     * calculate variance of fes and SSH + height_cor_xover, 

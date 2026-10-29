@@ -33,6 +33,7 @@ def analyze_point(pass_data, ci, cj, pass_number, output_dir):
     ssh_vals = []
     fes_vals = []
     got_vals = []
+    ice_vals = []
 
     for cycle, cdata in pass_data["cycles"].items():
         ssh_qual = cdata["ssh_karin_2_qual"][ci, cj]
@@ -43,6 +44,7 @@ def analyze_point(pass_data, ci, cj, pass_number, output_dir):
         ssh = cdata["ssh_karin_2"][ci, cj] + cdata["height_cor_xover"][ci, cj]
         fes = cdata["ocean_tide_fes"][ci, cj]
         got = cdata["ocean_tide_got"][ci, cj]
+        ice = cdata["dynamic_ice_flag"][ci, cj]
 
         if np.isnan(ssh) or np.isnan(fes) or np.isnan(got):
             continue
@@ -51,6 +53,7 @@ def analyze_point(pass_data, ci, cj, pass_number, output_dir):
         ssh_vals.append(float(ssh))
         fes_vals.append(float(fes))
         got_vals.append(float(got))
+        ice_vals.append(float(ice))
 
     if len(cycles_list) < 3:
         return None
@@ -60,6 +63,7 @@ def analyze_point(pass_data, ci, cj, pass_number, output_dir):
         "ssh_karin_2_plus_xover_m": np.array(ssh_vals),
         "ocean_tide_fes_m": np.array(fes_vals),
         "ocean_tide_got_m": np.array(got_vals),
+        "dynamic_ice_flag": np.array(ice_vals),
     })
 
     fname = f"pass_{pass_number:03d}_lat_{center_lat:.4f}_lon_{center_lon:.4f}.csv"

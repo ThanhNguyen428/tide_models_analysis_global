@@ -21,6 +21,7 @@ CYCLE_VARS = [
     "ssh_karin_2", "height_cor_xover",
     "ocean_tide_fes", "ocean_tide_got",
     "ssh_karin_2_qual", "height_cor_xover_qual",
+    "dynamic_ice_flag",
 ]
 
 
