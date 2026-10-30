@@ -16,12 +16,12 @@ Variables used:
 * ocean_tide_got 
 
 Across all available cycles for a given "valid" pixel,
-the measured and modeled data are recorded and aggregated as necessary to calculate the coefficient of determination
+the measured and modeled data are recorded to calculate the coefficient of determination
 (R<sup>2</sup>) and the correlated variance of a given tide model and ssh_karin_2 + height_cor_xover.
 
-The specific details also vary between methods of analysis (see below).
+The specific details also vary between bbounds of of analysis (see below).
 
-
+<!-- 
 ## Patch analysis
 
 Refer to `general_logic.txt` for the detailed logic driving the algorithm behind the patch analyses.
@@ -31,7 +31,7 @@ within 5km of nearby coastline. The analysis was done from 25 N to 25 S.
 
 
 * `r2_discrepancy_5x5.html`: contains the results of using 5x5 patches. Contains 315,602 "valid" patches.
-* `r2_discrepancy_map.html`: contains the results of using 10x10 patches. Contains 344,595 "valid" patches.
+* `r2_discrepancy_map.html`: contains the results of using 10x10 patches. Contains 344,595 "valid" patches. -->
 
 ---
 
