@@ -1,5 +1,5 @@
 """
-Steps 2–4 from single_pixel_logic.txt, plus R² and correlated variance from CSVs.
+Steps 2–4 from single_pixel_logic.txt, plus R² and variance from CSVs.
 
     2. Identify coastline per pass
     3. Check every coastal point with valid quality
@@ -35,17 +35,6 @@ def compute_r2(y, x):
     return 1 - rss / tss
 
 
-# ── correlated variance ───────────────────────────────────────────────────
-
-def compute_correlated_variance(a, b):
-    """Var(A + B) = Var(A) + Var(B) + 2*Cov(A, B). Returns NaN if < 3 valid."""
-    valid = ~(np.isnan(a) | np.isnan(b))
-    if valid.sum() < 3:
-        return np.nan
-    a, b = a[valid], b[valid]
-    return np.var(a, ddof=1) + np.var(b, ddof=1) + 2 * np.cov(a, b, ddof=1)[0, 1]
-
-
 def compute_metrics_from_csv(csv_path):
     """Read a per-point CSV and return (r2_fes, r2_got, fes_var, got_var).
 
@@ -62,8 +51,9 @@ def compute_metrics_from_csv(csv_path):
     return (
         compute_r2(fes, ssh),
         compute_r2(got, ssh),
-        compute_correlated_variance(fes, ssh),
-        compute_correlated_variance(got, ssh),
+        np.var(ssh, ddof=1),
+        np.var(fes, ddof=1),
+        np.var(got, ddof=1)
     )
 
 
@@ -77,7 +67,7 @@ def identify_coastline(pass_data):
         (dtc >= 0) & (dtc <= COAST_DIST_MAX)
         & (depth <= DEPTH_COASTAL_MAX)
         & ~np.isnan(dtc) & ~np.isnan(depth)
-    )
+        )
 
 
 # ── steps 3 & 4 ────────────────────────────────────────────────────────────
@@ -89,7 +79,7 @@ def process_pass(pass_number, pass_data, output_dir):
       1. swot_tide_analysis writes the per-cycle CSV (no R²)
       2. this function reads it back and computes R² and correlated variance
 
-    Returns list of dicts: {lat, lon, r2_fes, r2_got, fes_var, got_var}
+    Returns list of dicts: {lat, lon, r2_fes, r2_got, ssh_var, fes_var, got_var}
     """
     depth = pass_data["depth_or_elevation"]
     n_lines, n_pixels = depth.shape
@@ -114,7 +104,7 @@ def process_pass(pass_number, pass_data, output_dir):
             metrics = compute_metrics_from_csv(csv_path)
             if metrics is None:
                 continue
-            r2_fes, r2_got, fes_var, got_var = metrics
+            r2_fes, r2_got, ssh_var, fes_var, got_var = metrics
 
             center_lat = float(pass_data["latitude"][i, j])
             center_lon = float(pass_data["longitude"][i, j])
@@ -126,6 +116,7 @@ def process_pass(pass_number, pass_data, output_dir):
                 "lon": center_lon,
                 "r2_fes": float(r2_fes),
                 "r2_got": float(r2_got),
+                "ssh_var": float(ssh_var),
                 "fes_var": float(fes_var),
                 "got_var": float(got_var),
             })

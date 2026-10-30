@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
         for r in results:
             key = f"{r['lat']:.4f},{r['lon']:.4f}"
-            r2_dict[key] = [r["r2_fes"], r["r2_got"], r["fes_var"], r["got_var"]]
+            r2_dict[key] = [r["r2_fes"], r["r2_got"], r["ssh_var"], r["fes_var"], r["got_var"]]
 
         elapsed = time.time() - t0
         print(f"{len(results)} points – {elapsed / 60:.1f} min elapsed",
