@@ -97,7 +97,7 @@ input[type=range]:focus-visible{outline:2px solid var(--focus);outline-offset:3p
 
 <div class="head">
   <h1>Single Pixel: FES vs GOT R² Discrepancy (Ice-Filtered)</h1>
-  <p>861,701 SWOT coastline points (single pixel, ice-filtered: all cycles must have dynamic_ice_flag = 0) showing R² discrepancy between FES and GOT ocean-tide corrections. 55°S–65°N, within 10 km of land.</p>
+  <p>864,752 SWOT coastline points (single pixel, ice-filtered: all cycles must have dynamic_ice_flag = 0) showing R² discrepancy between FES and GOT ocean-tide corrections. 55°S–65°N, within 10 km of land.</p>
 </div>
 <div class="stats" id="stats"></div>
 <div class="controls">
@@ -5280,7 +5280,7 @@ const BORDERS=[
 (function(){
 "use strict";
 var D=D1.concat(D2).concat(D3);
-var STRIDE=6;
+var STRIDE=7;
 var NPTS=D.length/STRIDE;
 var css=function(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()};
 var num=function(n){return n.toLocaleString("en-US")};
@@ -5335,9 +5335,9 @@ function tipHTML(r){
   return'<div class="tt-head">'+r.lat.toFixed(2)+"\u00b0, "+r.lon.toFixed(2)+"\u00b0</div>"+
     '<div class="tt-row"><span class="k">R\u00b2 FES</span><span class="v">'+fmt(r.fes)+"</span></div>"+
     '<div class="tt-row"><span class="k">R\u00b2 GOT</span><span class="v">'+fmt(r.got)+"</span></div>"+
-    '<div class="tt-row"><span class="k">\u0394 (FES\u2212GOT)</span><span class="v">'+signed(r.d)+"</span></div>"+
-    '<div class="tt-row"><span class="k">SD(FES + corrected SSH)</span><span class="v">'+Math.sqrt(r.fv).toFixed(4)+"</span></div>"+
-    '<div class="tt-row"><span class="k">SD(GOT + corrected SSH)</span><span class="v">'+Math.sqrt(r.gv).toFixed(4)+"</span></div>"+
+    '<div class="tt-row"><span class="k">STD(SSH)</span><span class="v">'+r.ssh_s.toFixed(4)+"</span></div>"+
+    '<div class="tt-row"><span class="k">STD(FES)</span><span class="v">'+r.fes_s.toFixed(4)+"</span></div>"+
+    '<div class="tt-row"><span class="k">STD(GOT)</span><span class="v">'+r.got_s.toFixed(4)+"</span></div>"+
     '<div class="tt-win"><span class="dot" style="background:'+r.c+'"></span>'+b+" fits better</div>";
 }
 function popHTML(r){
@@ -5347,9 +5347,9 @@ function popHTML(r){
     '<div class="pop-rows">'+
       '<div class="tt-row"><span class="k">R\u00b2 FES</span><span class="v">'+fmt(r.fes)+"</span></div>"+
       '<div class="tt-row"><span class="k">R\u00b2 GOT</span><span class="v">'+fmt(r.got)+"</span></div>"+
-      '<div class="tt-row"><span class="k">\u0394 (FES\u2212GOT)</span><span class="v">'+signed(r.d)+"</span></div>"+
-      '<div class="tt-row"><span class="k">SD(FES + corrected SSH)</span><span class="v">'+Math.sqrt(r.fv).toFixed(4)+"</span></div>"+
-      '<div class="tt-row"><span class="k">SD(GOT + corrected SSH)</span><span class="v">'+Math.sqrt(r.gv).toFixed(4)+"</span></div>"+
+      '<div class="tt-row"><span class="k">STD(SSH)</span><span class="v">'+r.ssh_s.toFixed(4)+"</span></div>"+
+      '<div class="tt-row"><span class="k">STD(FES)</span><span class="v">'+r.fes_s.toFixed(4)+"</span></div>"+
+      '<div class="tt-row"><span class="k">STD(GOT)</span><span class="v">'+r.got_s.toFixed(4)+"</span></div>"+
     "</div>"+
     '<button class="btn copy" type="button" data-coord="'+r.lat.toFixed(2)+","+r.lon.toFixed(2)+'">Copy coordinates</button>';
 }
@@ -5358,7 +5358,7 @@ function radiusFor(z){return z<=3?2:z<=5?3:z<=7?4:5}
 var layer=L.layerGroup().addTo(map);
 var markers=[];
 for(var i=0;i<D.length;i+=STRIDE){
-  var rec={lat:D[i]/100,lon:D[i+1]/100,fes:D[i+2]/10000,got:D[i+3]/10000,fv:D[i+4],gv:D[i+5],d:(D[i+2]-D[i+3])/10000};
+  var rec={lat:D[i]/100,lon:D[i+1]/100,fes:D[i+2]/10000,got:D[i+3]/10000,ssh_s:D[i+4],fes_s:D[i+5],got_s:D[i+6],d:(D[i+2]-D[i+3])/10000};
   rec.c=getDivColor(rec.d,MAX_ABS);
   var m=L.circleMarker([rec.lat,rec.lon],{radius:radiusFor(map.getZoom()),fillColor:rec.c,fillOpacity:0.85,color:rec.c,weight:0.5,opacity:0.95});
   m.rec=rec;
