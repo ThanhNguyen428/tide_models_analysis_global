@@ -132,45 +132,4 @@ def load_passes(pass_numbers=None):
 
 
 if __name__ == "__main__":
-    # ── single-node sequential fallback ──
-    sys.modules["setup"] = sys.modules[__name__]
-
-    import json
-    from read_pass import process_pass
-
-    RESULTS_DIR = Path("single_pixel_results")
-    RESULTS_DIR.mkdir(exist_ok=True)
-
-    ALL_DATA = load_passes()
-
-    r2_dict = {}
-    total_passes = len(ALL_DATA)
-    t0 = time.time()
-
-    for idx, (pass_num, pass_data) in enumerate(ALL_DATA.items(), 1):
-        print(f"[{idx}/{total_passes}] Pass {pass_num:03d} ...",
-              end=" ", flush=True)
-
-        results = process_pass(pass_num, pass_data, RESULTS_DIR)
-
-        for r in results:
-            key = f"{r['lat']:.4f},{r['lon']:.4f}"
-            r2_dict[key] = [r["r2_fes"], r["r2_got"], r["ssh_var"], r["fes_var"], r["got_var"]]
-
-        elapsed = time.time() - t0
-        print(f"{len(results)} points – {elapsed / 60:.1f} min elapsed",
-              flush=True)
-
-    sorted_dict = dict(
-        sorted(r2_dict.items(),
-               key=lambda kv: (-float(kv[0].split(",")[0]),
-                                float(kv[0].split(",")[1])))
-    )
-
-    summary_path = RESULTS_DIR / "r2_summary.json"
-    with open(summary_path, "w") as f:
-        json.dump(sorted_dict, f, indent=2)
-
-    print(f"\nDone: {len(sorted_dict)} total points")
-    print(f"CSVs in:   {RESULTS_DIR}/")
-    print(f"Summary:   {summary_path}")
+    print("setup: library module — import load_passes() / FILE_INDEX")

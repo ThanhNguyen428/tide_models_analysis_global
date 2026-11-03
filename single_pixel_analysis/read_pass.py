@@ -21,18 +21,28 @@ from swot_tide_analysis import analyze_point
 # ── R² ─────────────────────────────────────────────────────────────────────
 
 def compute_r2(y, x):
-    """R² via OLS regression. Returns NaN if fewer than 3 valid points."""
+    """R² of an OLS fit of y on x via regression.
+
+    Returns NaN if fewer than 3 valid points.
+    Returns 0.0 if x is constant (explains nothing).
+    Returns NaN if y is constant (nothing to explain).
+    Returns R² otherwise.
+    """
     valid = ~(np.isnan(y) | np.isnan(x))
     if valid.sum() < 3:
         return np.nan
     y, x = y[valid], x[valid]
-    design = np.column_stack([np.ones_like(x), x])
-    (b0, b1), *_ = np.linalg.lstsq(design, y, rcond=None)
-    rss = np.sum((y - (b0 + b1 * x)) ** 2)
-    tss = np.sum((y - y.mean()) ** 2)
-    if tss == 0:
+
+    ss_tot = float(np.sum((y - y.mean()) ** 2))
+    if ss_tot == 0:
         return np.nan
-    return 1 - rss / tss
+    if np.all(x == x[0]): 
+        return 0.0
+
+    design = np.column_stack([np.ones_like(x), x]) # intercept + slope
+    coef, *_ = np.linalg.lstsq(design, y, rcond=None)
+    ss_res = float(np.sum((y - design @ coef) ** 2))
+    return 1 - ss_res / ss_tot
 
 
 def compute_metrics_from_csv(csv_path):
@@ -49,8 +59,8 @@ def compute_metrics_from_csv(csv_path):
     fes = df["ocean_tide_fes_m"].values
     got = df["ocean_tide_got_m"].values
     return (
-        compute_r2(fes, ssh),
-        compute_r2(got, ssh),
+        compute_r2(ssh, fes),
+        compute_r2(ssh, got),
         np.std(ssh, ddof=1),
         np.std(fes, ddof=1),
         np.std(got, ddof=1)
@@ -60,12 +70,14 @@ def compute_metrics_from_csv(csv_path):
 # ── step 2 ──────────────────────────────────────────────────────────────────
 
 def identify_coastline(pass_data):
-    """Coastline mask: distance_to_coast in [0, 5000] AND depth_or_elevation <= 0."""
+    """Coastline mask: distance_to_coast in [0, COAST_DIST_MAX] AND 
+    depth_or_elevation in [DEPTH_SHALLOW_LIMIT, DEPTH_COASTAL_MAX]."""
     dtc = pass_data["distance_to_coast"]
     depth = pass_data["depth_or_elevation"]
     return (
         (dtc >= 0) & (dtc <= COAST_DIST_MAX)
         & (depth <= DEPTH_COASTAL_MAX)
+        & (depth >= DEPTH_SHALLOW_LIMIT)
         & ~np.isnan(dtc) & ~np.isnan(depth)
         )
 
@@ -91,8 +103,6 @@ def process_pass(pass_number, pass_data, output_dir):
     for i in range(n_lines):
         for j in range(n_pixels):
             if not coast_mask[i, j]:
-                continue
-            if depth[i, j] < DEPTH_SHALLOW_LIMIT:
                 continue
 
             csv_path = analyze_point(
