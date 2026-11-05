@@ -41,13 +41,15 @@ within 5km of nearby coastline. The analysis was done from 25 N to 25 S.
 
 ---
 
-## Single pixel analysis (all files located in `single_pixel_analysis/`)
+## Single pixel analysis (all code files located in `single_pixel_analysis/`)
 
 Refer to `general_logic.txt` for the detailed logic driving the algorithm behind the single pixel analyses.
 
 Our initial tropical-latitude (25 N to 25 S) analyses considered pixels within two distances from nearby coastline: 5km and 10km.
 
 A third analysis expanded the latitude range from 65 N to 55 S and considered pixels within 10km from nearby coastline.
+
+### Maps of results (found in `maps/`)
 
 1. `single_pixel_r2_map_5km.html`: contains the results of single-pixel analysis within 5km of coastline. Contains 212,580 "valid" points.
 2. `single_pixel_r2_map_10km.html`: contains the results of single-pixel analysis within 10km of coastline. Contains 456,794 "valid" points.
