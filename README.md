@@ -2,6 +2,12 @@
 Analyzing tide predictions from FES and GOT across different coastal locations in the tropics
 
 ---
+Install all Python dependencies for this repo using:
+
+```
+pip install -r requirements.txt
+```
+---
 
 Data source: [SWOT Satellite, Expert Data, Version D](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-lr-ssh-expert-d-d#documents-and-resources)
 
@@ -43,6 +49,8 @@ Our initial tropical-latitude (25 N to 25 S) analyses considered pixels within t
 
 A third analysis expanded the latitude range from 65 N to 55 S and considered pixels within 10km from nearby coastline.
 
-* `single_pixel_r2_map_5km.html`: contains the results of single-pixel analysis within 5km of coastline. Contains 212,580 "valid" points.
-* `single_pixel_r2_map_10km.html`: contains the results of single-pixel analysis within 10km of coastline. Contains 456,794 "valid" points.
-* `single_pixel_r2_map_55S_65N_10km.html`: same as second map, but with expanded latitude bounds from 65 N to 55 S.
+1. `single_pixel_r2_map_5km.html`: contains the results of single-pixel analysis within 5km of coastline. Contains 212,580 "valid" points.
+2. `single_pixel_r2_map_10km.html`: contains the results of single-pixel analysis within 10km of coastline. Contains 456,794 "valid" points.
+3. `single_pixel_r2_map_55S_65N_10km.html`: same as second map, but with expanded latitude bounds from 65 N to 55 S.
+4. `single_pixel_r2_map_ice_filtered.html`: same as third map, but excluding pixels containing ice.
+5. `multivariate_r2_map_ice_filtered.html`: a multivariate map that distinguishes pixels by which tide model, if any, best explains its relationship with SSH. Based on fourth map.
