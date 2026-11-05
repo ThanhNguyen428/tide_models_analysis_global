@@ -1,0 +1,5 @@
+using the d1_ice, d2_ice, and d3_ice, make a multivariate map.
+
+* green: when FES R^2 is equal or greater than GOT's AND FES's R^2 is >= 0.35. The darker the green, the higher R^2 is for SSH vs. FES.
+* yellow: for when GOT's R^2 is greater than FES by R^2 of 0.05 AND GOT's R^2 is >= 0.35. The darker the yellow, the higher R^2 is for SSH vs. GOT.
+* red: for when both FES R^2 and GOT R^2 is lower than 0.35. The darker the red, the lower the smallest R^2 value is.
