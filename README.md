@@ -56,3 +56,12 @@ A third analysis expanded the latitude range from 65 N to 55 S and considered pi
 3. `single_pixel_r2_map_55S_65N_10km.html`: same as second map, but with expanded latitude bounds from 65 N to 55 S.
 4. `single_pixel_r2_map_ice_filtered.html`: same as third map, but excluding pixels containing ice.
 5. `multivariate_r2_map_ice_filtered.html`: a multivariate map that distinguishes pixels by which tide model, if any, best explains its relationship with SSH. Based on fourth map.
+
+Each page is a thin shell that loads its styles, basemap and data from sibling files in `maps/`, so open or serve them from inside that folder rather than copying a single `.html` elsewhere:
+
+- `map.css` + `leaflet.min.css` — shared page styling.
+- `basemap_geo.js` — Natural Earth coastlines and borders, shared by all five maps.
+- `map_common.js` — payload decoding, map/basemap setup, markers, controls, legend.
+- `discrepancy_map.js` — the ΔR² map shared by maps 1–4; each page adds a short config script of the same name as the page.
+- `multivariate_r2_map_ice_filtered.js` — the classification logic for map 5 (see `maps/map_logic.txt`).
+- Point payloads: `d_5km.js`, `d_10km.js`, `d1.js`/`d2.js`/`d3.js` (55S–65N) and `d1_ice.js`/`d2_ice.js`/`d3_ice.js` (ice-filtered).
